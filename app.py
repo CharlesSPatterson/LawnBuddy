@@ -28,6 +28,10 @@ def showSignUp():
 def showHowItWorks():
     return render_template('howItWorks.html')
     
+@app.route('/showUpdateHome')
+def showUpdateHome():
+    return render_template('updateHome.html')
+    
 @app.route('/showSignIn')
 def showSignIn():
     if session.get('user'):
@@ -96,6 +100,35 @@ def userHome():
         return render_template('userHome.html')
     else:
         return render_template('error.html', error = 'Unauthorized Access')
+        
+@app.route('/updateHome',methods=['POST'])
+def updateHome():
+    try:
+        if session.get('user'):
+            _address = request.form['address']
+            _city = request.form['city']
+            _state = request.form['state']
+            _zipcode = request.form['zipcode']
+            _phonenumber = request.form['phonenumber']
+            _groundsize = request.form['groundsize']
+            _notes = request.form['notes']
+            _user = session.get('user')
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_updateHome',(_address,_city,_groundsize,_phonenumber,_state,_notes,_zipcode,_user))
+            data = cursor.fetchall()
+            if len(data) is 0:
+                conn.commit()
+                return redirect('/userHome')
+            else:
+                return render_template('error.html',error = 'An error occurred!')
+        else:
+            return render_template('error.html',error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        conn.close()
         
 @app.route('/userVend')
 def userVend():
