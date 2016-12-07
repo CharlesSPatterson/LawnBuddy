@@ -4,14 +4,12 @@
 from flask import Flask, render_template, request, json, session, redirect
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
-import sys
 
 app = Flask(__name__)
 app.secret_key = 'what is the magic password?'
 
 mysql = MySQL()
  
-# MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
 app.config['MYSQL_DATABASE_DB'] = 'lawnbuddy'
@@ -25,6 +23,10 @@ def main():
 @app.route('/showSignUp')
 def showSignUp():
     return render_template('signup.html')
+
+@app.route('/howItWorks')
+def showHowItWorks():
+    return render_template('howItWorks.html')
     
 @app.route('/showSignIn')
 def showSignIn():
@@ -39,15 +41,14 @@ def signUp():
         _name = request.form['inputName']
         _email = request.form['inputEmail']
         _password = request.form['inputPassword']
+        _type = request.form['vendorFlag']
         # validate the received values
-        if _name and _email and _password:
-            # All Good, let's call MySQL
+        if _name and _email and _password and _type:
             conn = mysql.connect()
             cursor = conn.cursor()
             _hashed_password = generate_password_hash(_password)
-            cursor.callproc('sp_createUser',(_name,_email,_hashed_password))
+            cursor.callproc('sp_createUser',(_name,_email,_hashed_password,_type))
             data = cursor.fetchall()
-
             if len(data) is 0:
                 conn.commit()
                 return json.dumps({'message':'User created successfully !'})
@@ -71,18 +72,18 @@ def validateLogin():
         cursor = con.cursor()
         cursor.callproc('sp_validateLogin',(_username,))
         data = cursor.fetchall()
-        print(json.dumps({'test':'we\'re inside the validate login function'}))
         if len(data) > 0:
-            print(json.dumps({'test1':'1we\'re inside the validate login function'}))
             if check_password_hash(str(data[0][3]),_password):
                 session['user'] = data[0][0]
-                return redirect('/userHome')
+                session['vendorFlag'] = data[0][4]
+                if session.get('vendorFlag') == 0:
+                    return redirect('/userHome')
+                else:
+                    return redirect('/userVend')
             else:
                 return render_template('error.html',error = 'Wrong Email address or Password test 1.')
         else:
-            print(json.dumps({'test2':'2we\'re inside the validate login function'}))
             return render_template('error.html',error = 'Wrong Email address or Password test 2.')
-
     except Exception as e:
         return render_template('error.html',error = str(e))
     finally:
@@ -96,22 +97,18 @@ def userHome():
     else:
         return render_template('error.html', error = 'Unauthorized Access')
         
+@app.route('/userVend')
+def userVend():
+    if session.get('user'):
+        return render_template('userVend.html')
+    else:
+        return render_template('error.html', error = 'Unauthorized Access')
+        
 @app.route('/logout')
 def logout():
     session.pop('user',None)
-    return redirect('/')
-    
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-@app.route('/shutdown', methods=['POST'])
-def shutdown():
-    shutdown_server()
-    return 'Server shutting down...'        
-
+    return redirect('/')       
 
 if __name__ == "__main__":
+    app.debug = True
     app.run()
