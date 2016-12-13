@@ -257,7 +257,7 @@ def showCurrentBid():
                     message = "You have accepted this bid"
                 else:
                     message = "You have not accepted this bid"
-                return render_template('showCurrentBid.html', bid = data[0][3], vendorid = data[0][2], acceptanceMessage = message)
+                return render_template('showCurrentBid.html', bid = data[0][20], vendorid = data[0][2], acceptanceMessage = message)
             else:
                 message = "An error occurred! Please try again!"
                 message2 = "Current date & time:" + time.strftime("%c")
@@ -265,6 +265,31 @@ def showCurrentBid():
     else:
         return render_template('error.html',error = 'Unauthorized Access')
 
+@app.route('/submitReview',methods=['POST'])
+def submitReview():
+    try:
+        if session.get('user'):
+            _vendor_id = request.form['vendorid']
+            _review = request.form['review']
+            _rating = request.form['rating']
+            _user = session.get('user')
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_submitReview',(_vendor_id,_review,_rating,_user,))
+            data = cursor.fetchall()
+            if len(data) is 0:
+                conn.commit()
+                return render_template('userHome.html',message = 'Review Submitted!')
+            else:
+                return render_template('error.html',error = 'An error occurred!')
+        else:
+            return render_template('error.html',error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        conn.close()        
+        
 @app.route('/logout')
 def logout():
     session.pop('user',None)
