@@ -1,6 +1,6 @@
 CREATE DATABASE  IF NOT EXISTS `lawnbuddy` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `lawnbuddy`;
--- MySQL dump 10.13  Distrib 5.7.16, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.12, for Win64 (x86_64)
 --
 -- Host: localhost    Database: lawnbuddy
 -- ------------------------------------------------------
@@ -29,8 +29,10 @@ CREATE TABLE `tbl_bids` (
   `home_id` int(11) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `vendor_id` int(11) NOT NULL,
+  `bid_price` int(20) NOT NULL,
+  `accepted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`bid_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,6 +41,7 @@ CREATE TABLE `tbl_bids` (
 
 LOCK TABLES `tbl_bids` WRITE;
 /*!40000 ALTER TABLE `tbl_bids` DISABLE KEYS */;
+INSERT INTO `tbl_bids` VALUES (1,7,22,2,40,0),(2,35,22,2,35,0);
 /*!40000 ALTER TABLE `tbl_bids` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -57,10 +60,11 @@ CREATE TABLE `tbl_homes` (
   `zipcode` varchar(10) DEFAULT NULL,
   `phonenumber` varchar(10) DEFAULT NULL,
   `groundsize` int(4) DEFAULT '0',
+  `presetgroundsize` varchar(20) DEFAULT NULL,
   `notes` varchar(5000) DEFAULT NULL,
   `user_id` bigint(20) NOT NULL,
   PRIMARY KEY (`home_id`,`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10232 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10236 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +73,7 @@ CREATE TABLE `tbl_homes` (
 
 LOCK TABLES `tbl_homes` WRITE;
 /*!40000 ALTER TABLE `tbl_homes` DISABLE KEYS */;
-INSERT INTO `tbl_homes` VALUES (7,'13 Lawnside Rd','Cheltenham','PA','19012','2674746860',5012,'hello world',19),(56,'123 Fake Street','Bronx','NY','12345','1234567890',207,'nothing to see here',34),(10231,'421 Jump Street','Los Angeles','CA','90210','1234567890',6,'nothing to see here again',37);
+INSERT INTO `tbl_homes` VALUES (7,'13 Lawnside Rd','Cheltenham','PA','19012','2674746860',400,'Medium','magic',19),(56,'123 Fake Street','Bronx','NY','12345','1234567890',207,NULL,'nothing to see here',34),(10231,'421 Jump Street','Los Angeles','CA','90210','1234567890',6,NULL,'nothing to see here again',37),(10232,'133 Lawnside Rd','Cheltenham','PA','19012','2674746860',11,NULL,'testing 123',20),(10233,'13 Lawnside Rd','Cheltenham','PA','19012','2674746860',100,NULL,'I have very high shrubs',21),(10234,'more','fake','AR','19120','126738249',45,'Medium','lots of stuff',24),(10235,'13 Lawnside Rd','Cheltenham','PA','19012','2674746860',1,'Small','stuff',25);
 /*!40000 ALTER TABLE `tbl_homes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,7 +118,7 @@ CREATE TABLE `tbl_users` (
   `user_type` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,7 +127,7 @@ CREATE TABLE `tbl_users` (
 
 LOCK TABLES `tbl_users` WRITE;
 /*!40000 ALTER TABLE `tbl_users` DISABLE KEYS */;
-INSERT INTO `tbl_users` VALUES (19,'cust','cust@cust','pbkdf2:sha1:1000$DaNsKBaj$006dc2177e6da9dd7d2d97a5b7d7046c90f46f36',0),(20,'vend','vend@vend','pbkdf2:sha1:1000$U6sA0E9e$f711bb3cc816d3fb9dddcc55070865c463aaaea8',1);
+INSERT INTO `tbl_users` VALUES (19,'cust','cust@cust','pbkdf2:sha1:1000$cr9dNmll$7f5d7aee60870397c1aebd55c3c350228164d554',0),(21,'chuck','chuck@gmail.com','pbkdf2:sha1:1000$nwoyFAoS$bc8cd9313760cada9a5b0639fb6cb178dd1459d8',0),(22,'vend','vend@vend','pbkdf2:sha1:1000$nd3J25t4$737f01ed3d77277b41d5e9cc0788e4646657a7b8',1),(23,'chuck2','chuck2@gmail.com','pbkdf2:sha1:1000$ooBeEMI3$53a3e82250e22f03df8a3232cd02e0e89e2be0a3',0),(24,'thing','thing@thing','pbkdf2:sha1:1000$j7L2iijI$f381e24b340378343f51c7212b12847572a9b91f',0);
 /*!40000 ALTER TABLE `tbl_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -137,11 +141,13 @@ DROP TABLE IF EXISTS `tbl_vendors`;
 CREATE TABLE `tbl_vendors` (
   `vendor_id` int(11) NOT NULL AUTO_INCREMENT,
   `price_per_sf` int(20) NOT NULL,
-  `phone_number` varchar(10) NOT NULL,
+  `phonenumber` varchar(10) NOT NULL,
   `notes` varchar(5000) DEFAULT NULL,
   `rating` int(10) DEFAULT '0',
+  `state` varchar(2) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`vendor_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,6 +156,7 @@ CREATE TABLE `tbl_vendors` (
 
 LOCK TABLES `tbl_vendors` WRITE;
 /*!40000 ALTER TABLE `tbl_vendors` DISABLE KEYS */;
+INSERT INTO `tbl_vendors` VALUES (1,15,'1234567890','I charge a lot',0,'PA',20),(2,20,'12345678','nothing',0,'RI',22);
 /*!40000 ALTER TABLE `tbl_vendors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -201,6 +208,120 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_getHomeID` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_getHomeID`(
+    IN p_user_id bigint
+)
+BEGIN
+	SELECT home_id, user_id
+    FROM lawnbuddy.tbl_homes
+    WHERE user_id = p_user_id;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_GetHousesForVendors` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetHousesForVendors`(
+IN p_user_id bigint
+)
+BEGIN
+    select * from tbl_homes where user_id != p_user_id;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_getVendorID` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_getVendorID`(
+    IN p_user_id bigint
+)
+BEGIN
+	SELECT vendor_id, user_id
+    FROM lawnbuddy.tbl_vendors
+    WHERE user_id = p_user_id;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_submitBid` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_submitBid`(
+    IN p_home_id int(11),
+	IN p_vendor_id int(11),
+    IN p_bid_price int(20),
+    IN p_user_id bigint
+)
+BEGIN
+    if ( select exists (select 1 from tbl_bids where user_id = p_user_id and home_id = p_home_id) ) THEN
+     
+		UPDATE
+		tbl_bids
+		SET
+		`bid_price` = p_bid_price
+		WHERE `user_id` = p_user_id;
+     
+    ELSE
+
+    insert into tbl_bids(
+        home_id,
+        user_id,
+        vendor_id,
+        bid_price
+    )
+    values
+    (
+		p_home_id,
+		p_user_id,
+		p_vendor_id,
+		p_bid_price
+    );
+END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_updateHome` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -215,6 +336,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_updateHome`(
     IN p_address varchar(255),
     IN p_city varchar(255),
     IN p_groundsize int(4),
+    IN p_presetgroundsize varchar(20),
     IN p_phonenumber varchar(10),
     IN p_state varchar(2),
     IN p_notes varchar(5000),
@@ -233,6 +355,7 @@ BEGIN
 		`zipcode` = p_zipcode,
 		`phonenumber` = p_phonenumber,
 		`groundsize` = p_groundsize,
+        `presetgroundsize` = p_presetgroundsize,
 		`notes` = p_notes
 		WHERE `user_id` = p_user_id;
      
@@ -242,6 +365,7 @@ BEGIN
         address,
         city,
         groundsize,
+        presetgroundsize,
         phonenumber,
         state,
         notes,
@@ -253,10 +377,64 @@ BEGIN
 		p_address,
 		p_city,
 		p_groundsize,
+        p_presetgroundsize,
 		p_phonenumber,
 		p_state,
 		p_notes,
 		p_zipcode,
+		p_user_id
+    );
+END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_updateVend` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_updateVend`(
+    IN p_ppsf int(20),
+	IN p_state varchar(2),
+    IN p_phonenumber varchar(10),
+    IN p_notes varchar(5000),
+    IN p_user_id bigint
+)
+BEGIN
+    if ( select exists (select 1 from tbl_vendors where user_id = p_user_id) ) THEN
+     
+		UPDATE
+		tbl_vendors
+		SET
+		`price_per_sf` = p_ppsf,
+		`state` = p_state,
+		`phonenumber` = p_phonenumber,
+		`notes` = p_notes
+		WHERE `user_id` = p_user_id;
+     
+    ELSE
+
+    insert into tbl_vendors(
+        price_per_sf,
+        phonenumber,
+        state,
+        notes,
+        user_id
+    )
+    values
+    (
+		p_ppsf,
+		p_phonenumber,
+		p_state,
+		p_notes,
 		p_user_id
     );
 END IF;
@@ -297,4 +475,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-07  7:35:57
+-- Dump completed on 2016-12-13  3:55:39

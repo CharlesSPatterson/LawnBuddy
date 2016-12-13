@@ -208,7 +208,38 @@ def showHouses():
 @app.route('/showSubmitBid')
 def showSubmitBid():
     return render_template('submitBid.html')
+    
+@app.route('/submitBid',methods=['POST'])
+def submitBid():
+    try:
+        if session.get('user'):
+            _home_id = request.form['home_id']
+            _price_per_sf = request.form['price_per_sf']
+            _user = session.get('user')
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_getVendorID',(_user,))
+            data = cursor.fetchall()
+            _vendor_id = data[0][0]
+            cursor.callproc('sp_submitBid',(_home_id,_vendor_id,_price_per_sf,_user,))
+            data = cursor.fetchall()
+            if len(data) is 0:
+                conn.commit()
+                return redirect('/userVend')
+            else:
+                return render_template('error.html',error = 'An error occurred!')
+        else:
+            return render_template('error.html',error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        conn.close()
         
+@app.route('/showCurrentBid')
+def showCurrentBid():
+    return render_template('showCurrentBid.html')    
+
 @app.route('/logout')
 def logout():
     session.pop('user',None)

@@ -10,36 +10,35 @@
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation" class="active"><a href="#">Update</a></li>
-                    <li role="presentation"><a href="/logout">Logout</a></li>
+                    <li role="presentation"><a href="/userVend">Home</a></li>
+                    <li role="presentation" class="active"><a href="/logout">Logout</a></li>
                 </ul>
             </nav>
             <h3 class="text-muted">LawnBuddy</h3>
         </div>
         <section>
-            <form class="form-horizontal" method="post" action="/updateVend">
+            <form class="form-horizontal" method="post" action="/submitBid">
                 <fieldset>
                     <!-- Form Name -->
-                    <legend>Update Vendor Information</legend>
- 
+                    <legend>Submit your Bid</legend>
                     <!-- Text input-->
+					<div class="form-group">
+                        <label class="col-md-4 control-label" for="txtTitle">Home ID</label>
+                        <div class="col-md-4">
+                            <input id="txtTitle" name="home_id" type="text" class="form-control input-md">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="txtTitle">Rate per square foot (USD)</label>
                         <div class="col-md-4">
                             <input id="txtTitle" name="price_per_sf" type="text" class="form-control input-md">
                         </div>
                     </div>
-					<div class="form-group">
-                        <label class="col-md-4 control-label" for="txtTitle">Phone Number (Form: XXXXXXXXXX)</label>
-                        <div class="col-md-4">
-                            <input id="txtTitle" name="phonenumber" type="text" placeholder="Form: XXXXXXXXXX" class="form-control input-md">
-                        </div>
-                    </div>
                     <!-- Button -->
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="singlebutton"></label>
                         <div class="col-md-4">
-                            <input id="singlebutton" name="singlebutton" class="btn btn-primary" type="submit" value="Save" />
+                            <input id="singlebutton" name="singlebutton" class="btn btn-primary" type="submit" value="Submit" />
                         </div>
                     </div>
                 </fieldset>
