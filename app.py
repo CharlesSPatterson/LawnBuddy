@@ -19,7 +19,14 @@ mysql.init_app(app)
 @app.route("/")
 def main():
     return render_template('index.html')
-    
+
+@app.route('/showSignIn')
+def showSignIn():
+    if session.get('user'):
+        return render_template('userHome.html')
+    else:
+        return render_template('signin.html')
+        
 @app.route('/showSignUp')
 def showSignUp():
     return render_template('signup.html')
@@ -27,17 +34,6 @@ def showSignUp():
 @app.route('/howItWorks')
 def showHowItWorks():
     return render_template('howItWorks.html')
-    
-@app.route('/showUpdateHome')
-def showUpdateHome():
-    return render_template('updateHome.html')
-    
-@app.route('/showSignIn')
-def showSignIn():
-    if session.get('user'):
-        return render_template('userHome.html')
-    else:
-        return render_template('signin.html')
     
 @app.route('/signUp',methods=['POST','GET'])
 def signUp():
@@ -55,9 +51,14 @@ def signUp():
             data = cursor.fetchall()
             if len(data) is 0:
                 conn.commit()
-                return json.dumps({'message':'User created successfully !'})
+                json.dumps({'message':'User created successfully !'})
+                if _type == 1: #if the user is a vendor
+                    redirect('/userVend')
+                else:
+                    redirect('/userHome')
             else:
-                return json.dumps({'error':str(data[0])})
+                json.dumps({'error':str(data[0])})
+                redirect('/'    )
         else:
             return json.dumps({'html':'<span>Enter the required fields</span>'})
 
@@ -85,9 +86,9 @@ def validateLogin():
                 else:
                     return redirect('/userVend')
             else:
-                return render_template('error.html',error = 'Wrong Email address or Password test 1.')
+                return render_template('error.html',error = 'Wrong Email address or Password')
         else:
-            return render_template('error.html',error = 'Wrong Email address or Password test 2.')
+            return render_template('error.html',error = 'Wrong Email address or Password')
     except Exception as e:
         return render_template('error.html',error = str(e))
     finally:
@@ -96,10 +97,14 @@ def validateLogin():
         
 @app.route('/userHome')
 def userHome():
-    if session.get('user'):
+    if (session.get('user') and session.get('vendorFlag') == 0):
         return render_template('userHome.html')
     else:
         return render_template('error.html', error = 'Unauthorized Access')
+    
+@app.route('/showUpdateHome')
+def showUpdateHome():
+    return render_template('updateHome.html')
         
 @app.route('/updateHome',methods=['POST'])
 def updateHome():
@@ -111,11 +116,12 @@ def updateHome():
             _zipcode = request.form['zipcode']
             _phonenumber = request.form['phonenumber']
             _groundsize = request.form['groundsize']
+            _presetgroundsize = request.form['presetgroundsize']
             _notes = request.form['notes']
             _user = session.get('user')
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.callproc('sp_updateHome',(_address,_city,_groundsize,_phonenumber,_state,_notes,_zipcode,_user))
+            cursor.callproc('sp_updateHome',(_address,_city,_groundsize,_presetgroundsize,_phonenumber,_state,_notes,_zipcode,_user))
             data = cursor.fetchall()
             if len(data) is 0:
                 conn.commit()
@@ -132,15 +138,81 @@ def updateHome():
         
 @app.route('/userVend')
 def userVend():
-    if session.get('user'):
+    if (session.get('user') and session.get('vendorFlag') == 1):
         return render_template('userVend.html')
     else:
         return render_template('error.html', error = 'Unauthorized Access')
+
+@app.route('/showUpdateVend')
+def showUpdateVend():
+    return render_template('updateVend.html')
+        
+@app.route('/updateVend',methods=['POST'])
+def updateVend():
+    try:
+        if session.get('user'):
+            _price_per_sf = request.form['price_per_sf']
+            _state = request.form['state']
+            _phonenumber = request.form['phonenumber']
+            _notes = request.form['notes']
+            _user = session.get('user')
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_updateVend',(_price_per_sf,_state,_phonenumber,_notes,_user))
+            data = cursor.fetchall()
+            if len(data) is 0:
+                conn.commit()
+                return redirect('/userVend')
+            else:
+                return render_template('error.html',error = 'An error occurred!')
+        else:
+            return render_template('error.html',error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html',error = str(e))
+    finally:
+        cursor.close()
+        conn.close()
+        
+@app.route('/getHouses')
+def getHouses():
+    try:
+        if session.get('user'):
+            _user = session.get('user')
+            con = mysql.connect()
+            cursor = con.cursor()
+            cursor.callproc('sp_GetHousesForVendors',(_user,))
+            houses = cursor.fetchall()
+            houses_dict = []
+            for house in houses:
+                house_dict = {
+                        'Home ID': house[0],
+                        'Address': house[1],
+                        'City': house[2],
+                        'State': house[3],
+                        'Zip_Code': house[4],
+                        'Phone_Number': house[5][:3]+'-'+house[5][3:6]+'-'+house[5][6:10],
+                        'Ground_Size': house[6],
+                        'Notes': house[7],
+                        'Composite': 'the whole address here.'}
+                houses_dict.append(house_dict)
+            return json.dumps(houses_dict)
+        else:
+            return render_template('error.html', error = 'Unauthorized Access')
+    except Exception as e:
+        return render_template('error.html', error = str(e))
+        
+@app.route('/showHouses')
+def showHouses():
+    return render_template('showHouses.html')
+    
+@app.route('/showSubmitBid')
+def showSubmitBid():
+    return render_template('submitBid.html')
         
 @app.route('/logout')
 def logout():
     session.pop('user',None)
-    return redirect('/')       
+    return redirect('/')
 
 if __name__ == "__main__":
     app.debug = True
