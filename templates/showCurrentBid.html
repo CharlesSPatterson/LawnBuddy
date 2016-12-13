@@ -6,37 +6,6 @@
     <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
 	<script src="/static/js/jquery-3.1.1.js"></script>
 	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
-<script>
-    $(function() {
-        $.ajax({
-            url: '/getHouses',
-            type: 'GET',
-            success: function(res) {
-                console.log(res);
-				var div = $('<div>')
-					.attr('class', 'list-group')
-					.append($('<a>')
-						.attr('class', 'list-group-item active')
-						.append($('<h4>')
-							.attr('class', 'list-group-item-heading'),
-							$('<p>')
-							.attr('class', 'list-group-item-text')));
-				var houseObj = JSON.parse(res);
-				var house = '';
-				$.each(houseObj, function(index, value) {
-					house = $(div).clone();
-					$(house).find('h4').text(value.Address);
-					$(house).find('p').text(value.Composite);
-					$('.jumbotron').append(house);
-				});
-							},
-							error: function(error) {
-								console.log(error);
-							}
-        });
-    });
-</script>
-	
 </head>
 <body>
     <div class="container">
@@ -52,7 +21,11 @@
         </div>
         <div class="jumbotron">
             <h1>Current Bid</h1>
-			{{bid}}
+			<p>Your current lowest bid is {{bid}} by Vendor {{vendorid}}</p>
+			<p>{{acceptanceMessage}}</p>
+			<p><a class="btn btn-lg btn-primary" href="/showCurrentBid" role="button">Accept Bid</a></p>
+			<p><a class="btn btn-lg btn-success" href="/showAllVendors" role="button">Show All Vendors</a></p>
+			<p><a class="btn btn-lg btn-info" href="/showSubmitReview" role="button">Submit a Review</a></p>
 			<div class="list-group">
 			</div>
         </div>

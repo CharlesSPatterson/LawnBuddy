@@ -4,6 +4,7 @@
 from flask import Flask, render_template, request, json, session, redirect
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
+import time
 
 app = Flask(__name__)
 app.secret_key = 'what is the magic password?'
@@ -213,6 +214,7 @@ def showSubmitBid():
 def submitBid():
     try:
         if session.get('user'):
+            print(session.get('user'))
             _home_id = request.form['home_id']
             _price_per_sf = request.form['price_per_sf']
             _user = session.get('user')
@@ -221,7 +223,7 @@ def submitBid():
             cursor.callproc('sp_getVendorID',(_user,))
             data = cursor.fetchall()
             _vendor_id = data[0][0]
-            cursor.callproc('sp_submitBid',(_home_id,_vendor_id,_price_per_sf,_user,))
+            cursor.callproc('sp_submitBid',(_home_id,_vendor_id,_price_per_sf,))
             data = cursor.fetchall()
             if len(data) is 0:
                 conn.commit()
@@ -238,7 +240,30 @@ def submitBid():
         
 @app.route('/showCurrentBid')
 def showCurrentBid():
-    return render_template('showCurrentBid.html')    
+    if session.get('user'):
+            _user = session.get('user')
+            print("user id: ",_user)
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_getHomeID',(_user,))
+            data = cursor.fetchall()
+            _home_id = data[0][0]
+            print("home id: ",_home_id)
+            cursor.callproc('sp_getCurrentBid',(_home_id,))
+            data = cursor.fetchall()
+            if len(data) is 1:
+                print(data)
+                if data[0][4] == 1:
+                    message = "You have accepted this bid"
+                else:
+                    message = "You have not accepted this bid"
+                return render_template('showCurrentBid.html', bid = data[0][3], vendorid = data[0][2], acceptanceMessage = message)
+            else:
+                message = "An error occurred! Please try again!"
+                message2 = "Current date & time:" + time.strftime("%c")
+                return render_template('userHome.html',error = message, dateandtime = message2)
+    else:
+        return render_template('error.html',error = 'Unauthorized Access')
 
 @app.route('/logout')
 def logout():
